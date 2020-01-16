@@ -1,0 +1,57 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CROHME_XML_Grammar.Grammar
+%	- XML encoding used for CROHME Grammars.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Feb 13 2013 22:08:47
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+comments
+	'<!-- '-->
+	'<? '?>
+end comments
+
+compounds
+	'->
+end compounds
+
+
+% This is a CFG.
+define program
+	[grammar]
+end define
+
+define grammar
+	'< 'grammar 'name '= [stringlit] '> [NL][IN]
+	[repeat prod_rule]
+	[EX]
+	'</grammar>
+	| [repeat prod_rule]
+end define
+
+define prod_rule
+		'< 'rule 'category '= [stringlit] '> [NL][IN]
+			[repeat symbol]
+			[EX]
+		'< '/ 'rule '>[NL]
+	|	[NL] [symbol] '-> [repeat symbol] [NL] 
+	|	[IN] '| [repeat symbol]  [EX] [NL]
+end define
+
+define symbol
+		[nonterminal] 
+	|   [terminal] 
+end define
+
+define nonterminal
+	'< 'category 'name '= [stringlit] '/> 
+	|	[stringlit]
+end define
+
+define terminal
+	'< 'category 'terminal '= [stringlit] 'name '= [stringlit] '/>
+	|	[stringlit]
+end define
+

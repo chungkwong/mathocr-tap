@@ -1,0 +1,396 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CROHME2014_InkML.Grammar
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Jun 06 2011 01:36:58 PM
+%   - TXL Grammar for ICDAR 2011 output data.
+% v 1.0.1 Revised for CROHME 2012 by R. Zanibbi, May 2, 2012.
+% v 1.0.2 Revised for CROHME 2013 by R. Zanibbi, Feb, 2013.
+% v 1.0.3 Revised for CROHME 2014 by R. Zanibbi, Apr, 2014.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+include "Grammars/CROHME_Symbols.Grammar"
+include "Grammars/MathBrushLatex.Grammar"
+
+compounds
+	</math>
+	</annotationXML>
+end compounds
+
+comments
+	'<!-- '-->
+end comments
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Stoke data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define float
+		[SPOFF] [number] '. [number] [SPON]
+end define
+
+% DEBUG: CROHME 2013 has data with a time (i.e. 3rd) channel.
+define crohme_coordinate
+		[number] [number] [opt number]
+	|	[float] [float] [opt float]
+end define
+
+define stroke_id
+	[number] | [stringlit]
+end define
+
+define seg_id
+	'seg=[number] | 'seg=[stringlit]
+end define
+
+define segStrokeId
+		'id '= [stroke_id] seg '= [stroke_id]
+	|	'id '= [stroke_id]
+end define
+
+
+define stroke
+		[NL] '<trace [SP]
+			[segStrokeId]  '>  [SPON][NL]
+			[list crohme_coordinate+] [NL]
+		'</trace> [NL] 
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Symbol/segment references
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define xml_id 
+	[SP] 'xml:id '= [stringlit]
+end define
+
+define symbol_ref
+		[stringlit]
+end define
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Top-level file format
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define exp_id
+		[SPOFF] [number] [id] 
+	|	[id]
+end define
+
+define annot_value
+		[SP] [SPOFF] [id] '= [stringlit] 
+	|	[SP] [SPOFF] [id] '= [mathml_ref]
+	|	[SP] [SPOFF] [id] '= [id]
+end define
+
+define annot_content
+		[stringlit] | [number] | [id] | [misc_symbol] | '\ | '_ | '/ |
+		'$ [SPON] [repeat misc_symbol] '$ [SPOFF] | [crohme_symbol] 
+end define
+
+% DEBUG: multiple channels are perimitted (e.g. x,y and time)
+define channel_entry
+	'<channel [repeat annot_value] /> [NL]
+end define
+
+define annotation_entry
+
+	 '<annotation 
+		 [repeat annot_value]'>
+		 	[SPOFF]
+			[repeat annot_content] 
+		 '</annotation> [SPON] [NL]
+	| '<annotation [repeat annot_value] '>
+		  [SP]  [SPON] [tex_content]  [SP]
+	  '</annotation> [NL]
+	|	'<traceFormat> [NL] [IN]
+			[repeat channel_entry] [EX]
+		 '</traceFormat>  [NL]
+end define
+
+define segment_data
+	[NL]
+	'<traceGroup 
+		[SPOFF]
+		[xml_id] '> [SPON] [NL] [IN] % Expected traceGroup label (purpose: unknown)
+		'<annotation 
+			[SP][SPOFF] 'type="truth" >
+			[repeat id] 
+		'</annotation> [SPON] [NL] 
+
+	[repeat labeled_segment] [EX]
+	'</traceGroup> [NL]
+end define
+
+define mathml_ref
+	"http://www.w3.org/1998/Math/MathML"
+	| [SPOFF] ''http://www.w3.org/1998/Math/MathML'' 
+end define
+
+define crohme_mathEncoding
+	'<annotationXML [repeat annot_value]> [NL][IN]
+	'<math  [repeat annot_value] >[NL] [IN]
+
+	% Hack; allow outer scope not to include <mrow> tags.
+	[repeat mexpression] [EX]
+
+	% End math data.
+	'</math> [NL][EX]
+	'</annotationXML> [NL]
+
+end define
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Segments ('traceGroup's)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define stroke_ref
+	'<traceView
+		[SP][SPOFF] traceDataRef= [stringlit]'/> [SPON] [NL]
+end define
+
+define MathML_symbol_annotation
+	% Allows reference back to MathML
+	'<annotationXML 
+			[SP][SPOFF]
+			'href= [symbol_ref] 
+			'/> [SPON] [NL] 
+end define
+
+define labeled_segment
+	[NL]
+	'<traceGroup [SPOFF]
+		[xml_id] '>[SPON] [NL] [IN] % Identifies stroke set (segment)
+		'<annotation 
+			[SP][SPOFF]
+			'type="truth">
+			[crohme_symbol] 
+		'</annotation>[SPON]    [NL] 		% Label for stroke set. 
+
+		% List of strokes, with an annotation somewhere in the list.
+		[repeat stroke_ref]
+
+		% HACK!!! Making this optional to prevent parse failures.
+		% This provides the mapping between segment data and symbols
+		% provided in the MathML.
+		[opt MathML_symbol_annotation]
+
+		[repeat stroke_ref] [EX] 
+	 '</traceGroup> [NL]
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Individual symbols
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define mprimitive
+		[crohme_symbol]
+end define
+
+define midentifier
+	'<mi [opt xml_id] > 
+		[SPOFF]
+		[crohme_value] 
+	'</mi> 
+		[SPON]
+	|  '<mi [opt xml_id] > 
+		[SPOFF]
+		[crohme_function] 
+		'</mi> 
+		[SPON]
+end define
+
+define mnumber
+	'<mn 
+		[opt xml_id]  >
+		[SPOFF]
+		[crohme_digit]  '</mn> 
+		[SPON]
+end define
+
+define moperator
+		'<mo 
+			[opt xml_id] > 
+			[SPOFF]
+			[crohme_op] '</mo> 
+			[SPON]
+	| 	'<mo 
+		[opt xml_id] '>
+			[SPOFF]
+			[crohme_paren] '</mo>
+			[SPON]
+	% MfrDB addition
+	|	'<mo [opt xml_id] >
+			[SPOFF]
+			[crohme_function]
+		'</mo>
+		[SPON]
+end define
+
+define msymbol
+		[midentifier]
+	|	[mnumber]
+	|	[moperator]
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Structures
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Grids (tables)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define mltd
+	[SPOFF]'<mtd>[SPON][NL][IN]
+		[mexpression] [EX]
+	[SPOFF]'</mtd>[SPON] [NL]
+end define
+
+define mltr
+	[SPOFF]'<mtr>[SPON][NL][IN]
+		[repeat mltd+] [EX]
+	[SPOFF]'</mtr>[SPON] [NL]
+end define
+
+define mltable
+	[SPOFF]'<mtable>[SPON][NL][IN]
+		[repeat mltr+] [EX]
+	[SPOFF]'</mtable>[SPON] 
+end define
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Structures with symbols.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define mlfrac
+		'<mfrac 
+				[xml_id] '> [NL][IN]
+			[mexpression] 
+			[mexpression] [EX]
+		'</mfrac> 
+end define
+
+define mlroot
+	% Allow a list of mexpressions (only one argument for msqrt).
+	'<msqrt [xml_id] '> [NL][IN]
+			[repeat mexpression+] [EX]
+	</msqrt>
+
+	% Adding 'degenerate' roots with no argument.
+	| '<msqrt [xml_id] '> [NL]
+	  '</msqrt>
+
+	  % Adding nth-roots.
+	| '<mroot [xml_id] '> [NL][IN]
+			[mexpression] 
+			[mexpression] [EX]
+	 '</mroot>
+
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Layout tags
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define mlrow	
+	% 'CROHME' format uses explicit nesting of <mrow> tags.
+		'<mrow [opt annot_value] > [IN] [NL]
+			[mexpression] 
+			[repeat mexpression]
+			[EX]
+		'</mrow>
+end define
+
+define mlsubsup
+ 	'<msubsup> [NL][IN]
+		[mexpression] % Symbol
+		[mexpression] % Subscript
+		[mexpression] [EX]  % Superscript
+	'</msubsup> 
+end define
+
+define mlsub
+	'<msub> [NL][IN]
+		[mexpression]
+		[mexpression] [EX]
+	'</msub>
+end define
+
+define mlsup
+	 '<msup>  [NL][IN]
+		[mexpression]
+		[mexpression] [EX]
+	'</msup>
+end define
+
+define mlunder
+	 '<munder>  [NL][IN]
+		[mexpression] % 'Main' object (e.g. lim)
+		[mexpression] [EX]
+	'</munder>
+end define
+
+define mlunderover
+	 '<munderover>  [NL][IN]
+		[mexpression] % Object 
+		[mexpression] % Under
+		[mexpression] [EX] % Over 
+	 '</munderover>
+end define
+
+define mlover
+	 '<mover>  [NL][IN]
+		[mexpression] % 'Main' object (e.g. lim)
+		[mexpression] [EX]
+	 '</mover>
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Structure and Expression Types
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define mstructure
+		[mlfrac]
+	|	[mlroot]
+	|	[mltable]
+
+	% Without an associated symbol (layout only)
+	|	[mlrow]   % Horizontal adjacency (w. subexpressions)
+	|	[mlsup]	 % Superscript
+	|	[mlsub]	 % Subscript
+	|	[mlsubsup] % Sub and superscript
+	|	[mlunder]  % Under (for limits)
+
+	% For completeness, adding underover and over tags.
+	|	[mlunderover]
+	|	[mlover]
+end define
+
+define mexpression
+		[mstructure] [NL]
+	|	[msymbol] [NL]
+end define
+
+define xml_header_tag
+		[SPOFF]'<?xml[SPON]  
+		[repeat annot_value]
+		[SPOFF]'?>[SPON]
+end define
+
+define crohme_inkml_file
+	% Ground Truth/Output files have all the regions below;
+	% Test data only has annotations at top and stroke data!
+	
+	% RZ Correction; some files have an XML header.
+	[opt xml_header_tag]
+	'<ink [annot_value] > [NL] 
+
+	[repeat annotation_entry]
+
+	[opt crohme_mathEncoding]  % MathML
+	[repeat stroke]   		   % Input Strokes	
+	[opt segment_data] 	       % Stroke Segments
+	
+	'</ink>
+end define
+

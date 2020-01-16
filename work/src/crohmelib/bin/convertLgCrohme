@@ -1,0 +1,85 @@
+#!/bin/bash
+
+# NOTE:
+#
+# Make sure that CROHMELibDir and LgEvalDir are defined in your shell
+# enviroment, e.g. by including:
+#	
+#	export CROHMELibDir=<path_to_CROHMELib> 
+#	export LgEvalDir=<path_to_LgEval>
+#	export PATH=$PATH:$CROHMELibDir/bin:$LgEvalDir/bin
+# 
+# in your .bashrc file for bash shell.
+
+if [ $# -lt 2 ] 
+then
+	echo "CROHMELib *Batch* Label Graph  (.lg) to CROHME .inkml Converter"
+	echo "Copyright (c) R. Zanibbi, H. Mouchère, 2012-2014"
+	echo ""
+	echo "Usage: convertLgCrohme <lg_dir> <inkml_dir> OR"
+	echo "       convertLgCrohme <lg_file_list> <inkml_dir>"
+	echo ""
+	echo "Converts all .lg files in the passed directory or file list"
+	echo "to CROHME .inkml files, placing them in a directory named"
+	echo "<lg_dir>_merged/ or <lg_file_list>_merged."
+	echo "Corresponding .lg and .inkml files must have the same prefix."
+	echo ""
+	echo "Note: Error messages from failed conversions are written to"
+	echo "  ConvertLgCrohmeErrors-<lg_dir>."
+	exit 0
+fi
+
+BNAME=`basename $1`
+CONVDIR=${BNAME}_merged
+
+if [ ! -d $CONVDIR ]
+then
+	mkdir $CONVDIR
+fi
+
+
+echo "Converted files are being written to $CONVDIR."
+
+# Move to 'conversion' directory, and convert each file.
+rm -f ConvertLgCrohmeErrors-$1
+FILE_LIST=''
+if [ ! -d $1 ]
+then
+	FILE_LIST=`cat $1`
+else
+	FILE_LIST=`ls $1/*.lg`
+fi
+
+for file in $FILE_LIST
+do
+	FILEBASE=`basename $file .lg`
+	# Don't reprocess already converted files.
+	if ! [ -e $CONVDIR/${FILEBASE}.inkml ]
+	then
+
+		#echo "Merging: $file and $2/$FILEBASE.inkml"
+		$CROHMELibDir/bin/mergeLgCrohme $file $2/$FILEBASE.inkml 2> conv_temp
+		X=`cat conv_temp`
+
+		# If non-empty, record that the file conversion failed,
+		# and delete the output file.
+		if [ -n "$X" ]
+		then
+			echo "$X"
+			echo ">> Label Graph to CROHME CONVERSION ERROR: $file" >> ConvertLgCrohmeErrors-$1
+			echo "$X" >> ConvertLgCrohmeErrors-$1
+			echo "" >> ConvertLgCrohmeErrors-$1
+		fi	
+	
+		# DO NOT remove the output file - obtain partial results where
+		# possible.
+		#	rm -f ${FILEBASE}_crohme.lg ${FILEBASE}_out.inkml
+	
+		mv ${FILEBASE}_out.inkml $CONVDIR/${FILEBASE}.inkml
+		# In mass conversion, remove '_crohme' suffix.
+		#mv ${FILEBASE}_crohme.lg $CONVDIR/${FILEBASE}.lg
+	fi
+done
+
+echo "done."
+rm -f conv_temp

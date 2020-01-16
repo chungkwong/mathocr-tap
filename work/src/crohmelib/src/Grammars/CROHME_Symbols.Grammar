@@ -1,0 +1,218 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CROHME_Symbols.Grammar
+%
+% Copyright (c) 2011-2013, R. Zanibbi
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Jun 06 2011 01:35:49 PM
+%  - Symbol definitions for ICDAR 2011 handwritten math competition.
+% v 1.0.1 Revised (RZ) Feb. 2013 (for CROHME 2013)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tokens
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+tokens
+	texCommand	"\\[\a\\]+"  % don't allow _ (i.e. don't use identifiers, '\i')
+	open_paren "\("
+	closed_paren "\)"
+	squote "'"
+	tag_start 		"<[\a]+"
+	tag 	"<[\a]+>"
+	end_tag "</[\a]>"
+	end_tag_single 	"/>"
+	unicode  "&[\d\a]+;"
+end tokens
+
+compounds
+	'/>
+	'<annotation
+	'<trace
+	'<traceGroup
+	'<traceFormat
+	'<channel
+	'<math
+	'xml:id
+	'</trace>
+	'</traceGroup>
+	'</annotation>
+	'<traceView
+	'</ink>
+	'<annotationXML
+	'</mrow>
+	'</mfrac>
+	'</munderover>
+	'</msubsup>
+	'</msup>
+	'</msub>
+	'</munder>
+	'</mover>
+	'</mi>
+	'</mn>
+	'</mo>
+	'</msqrt>
+	'&amp;
+	'</mroot>
+end compounds
+
+define misc_symbol
+    [id] | [texCommand] | [number] | [crohme_symbol] | '^ | '_ | '{ | '} | '&
+	| '&amp; | '/
+	| '* | '( | ') | '= | '+ | '- | '! | '^ | '_ | '{ | '}
+end define
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Values
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define crohme_letter
+	a | b | c | d | e | f | g | h
+  | i | j | k | l | m | n | o | p | q | r | s | t 
+  | u | v | w | x | y | z
+
+  | A | B | C 
+  | D  % not in CROHME 2013
+  | E | F | G | H | I 
+  %| J | K  % not in CROHME 2013
+  | L | M | N 
+  %| O 		% not in CROHME 2013
+  | P 
+  %| Q 
+  | R | S | T 
+  | U % not in CROHME 2013
+  | V 
+  | W % not in CROHME 2013
+  | X | Y 
+  %| Z
+end define
+
+define greek
+	% CROHME 2013 symbol set.
+	'\alpha | '\beta | '\gamma
+  | '\lambda | '\omega 
+  |	'\phi   | '\pi   | '\theta 
+  | '\sigma | '\mu   | '\Delta
+
+  | alpha | beta | gamma 
+  | lambda | omega 
+  | phi | pi | theta 
+  | sigma | mu | Delta
+  | [unicode]  % to support visualization.
+end define
+
+define constant
+ 	'\infty | infty
+	| \Real | Real
+end define
+
+define crohme_value
+	[crohme_letter]
+  |	[greek]
+  |	[constant]
+  |	[id]          % HACK
+  |	[texCommand]  % HACK
+  |	'ERROR
+end define
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Operators
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define binary_infix_ops
+	'+ | '- 
+  | '\pm  | 'pm  %plus-minus
+  | '\div | 'div  %divide
+  | '\times  | 'times 
+  | =
+  % RZ: adding symbol class synonymns.
+  | '\neq | 'neq | 'ne
+  | '\leq | 'leq | 'le
+  | '\geq | 'geq  | 'ge
+  | '\lt | 'lt | '&lt;
+  | '\gt | 'gt | '&gt;
+  | < | >    % DUPLICATE (also have \lt, \gt)
+  | '\ldots % ellipses
+  | '\rightarrow
+  |	'rightarrow
+  |	[SPOFF] 'horizontal-line [SPON]
+  | 'in | '\in
+  | '/
+  |	'\ast | 'ast
+  |	'\wedge | 'wedge 
+  | '\vee   | 'vee
+  |	'\cup  | 'cup  % union
+  | '\cap  | 'cap  % intersection
+  | '\supset | 'supset
+  | 'subset | 'subset
+end define
+
+define indexed_ops
+	'\sum  |  sum 
+	| '\int | int | Integral
+	| '\lim | lim
+end define
+
+define square_root
+	'sqrt | '\sqrt
+end define
+
+define crohme_op
+		[binary_infix_ops]
+	| 	[indexed_ops] %% !!! These may have their own tags in MathML.
+	|	[square_root]
+	|	'!
+	|	'COMMA
+	|	',
+	|	'.
+	|	'\ldots | 'ldots
+	|	'\cdots | 'cdots
+    |	'|    % vertical bar
+	|	'\forall | forall
+	|	'\exists | exists
+	|	'\partial | partial
+	|	'' | 'prime
+
+	% HACK!!! Adding 'd' to prevent parse failure for MfrDB data.
+	|	'd
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define crohme_function
+		'\log | 'log
+	| '\sin | 'sin
+	| '\cos | 'cos
+	| '\tan | 'tan
+	| [texCommand]  % restoring - not enforcing CROHME 2013 symbol set.
+end define
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parens ('fences' for subexps.)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define crohme_paren
+	[open_paren] | [closed_paren]
+	% CROHME 2012
+	| '[ | ']
+	| '\{ | '\}
+	| '{ | '}
+end define
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% All symbols
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+define crohme_digit
+		0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9  % digits
+end define
+
+define crohme_symbol
+		[crohme_digit]
+	|	[crohme_op]
+	|	[crohme_function]
+	|	[crohme_paren]
+	|	[crohme_value]
+end define
+

@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# NOTE:
+#
+# Make sure that CROHMELibDir and LgEvalDir are defined in your shell
+# enviroment, e.g. by including:
+#	
+#	export CROHMELibDir=<path_to_CROHMELib> 
+#	export LgEvalDir=<path_to_LgEval>
+#	export PATH=$PATH:$CROHMELibDir/bin:$LgEvalDir/bin
+# 
+# in your .bashrc file for bash shell.
+
+if [ $# -lt 1 ] 
+then
+	echo "CROHMELib MathBrush .ink to CROHME .inkml Converter"
+	echo "Copyright (c) R. Zanibbi, H. Mouchere, 2012-2014"
+	echo ""
+	echo "Usage: mb2crohme file.ink [debug]"
+	echo ""
+	echo "Converts a MathBrush .ink file to a CROHME .inkml file"
+	echo "  written as 'file.inkml' in the current directory."
+	echo ""
+	echo "If a second argument is provided, then intermediate files"
+	echo "are not deleted."
+	exit 0
+fi
+
+BNAME=`basename $1 .ink`
+EMSG="!! ERROR converting $1" 
+
+function testExit () {
+	if [ $? -ne 0 ]
+	then
+		echo "  $EMSG"
+		rm -f $BNAME.inkml
+		exit
+	fi
+}
+
+# Remove any ^M (Carriage return) symbols from dos-format text files.
+perl -p -e "s///g" $1 > tempInput.ink
+
+# Convert stroke data to CROHME format (i.e. 'test' format)
+txl -q -newline -I  $CROHMELibDir/src -I $CROHMELibDir/src/Grammars tempInput.ink $CROHMELibDir/src/mathbrush2CROHMEInput.Txl - $BNAME.ink > tempCROHME.inkml
+
+testExit
+
+# Convert structure information to Label Graph format (csv)
+txl -q -newline -I $CROHMELibDir/src -I $CROHMELibDir/src/Grammars tempInput.ink $CROHMELibDir/src/mathbrush2lg.Txl > tempLg.lg
+
+testExit
+
+# Convert the Label Graph to a MathML file.
+python $LgEvalDir/src/lg2txt.py ./tempLg.lg $LgEvalDir/translate/mathMLMap.csv \
+	> tempMathML.mml
+
+testExit
+
+# Add MathML (structure) and segmentation information to the 'stroke' data.
+txl -q -w 8112 -q -I $CROHMELibDir/src -I $CROHMELibDir/src/Grammars tempCROHME.inkml \
+	$CROHMELibDir/src/insertMathML.Txl - tempMathML.mml $1 > $BNAME.inkml
+
+testExit
+
+if [ $# -lt 2 ]
+then
+	# Remove intermediate files.
+	rm tempInput.ink tempCROHME.inkml tempLg.lg tempMathML.mml
+fi
+

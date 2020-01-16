@@ -1,0 +1,40 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% LabelGraph.Grammar
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Feb 13 2013 22:07:43
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+include "Grammars/CROHME_Symbols.Grammar"
+
+define label_graph
+ 	    [repeat label]
+	|	[repeat node_label] [NL] % symbol labels 
+		[repeat edge_label] [NL] % segments
+		[repeat edge_label] % relationship labels
+end define
+
+comments
+    '#
+end comments
+
+define lg_symbol
+		[crohme_symbol] 
+	|	[mbsymbol_id]
+end define
+
+define label
+       [node_label]
+    |  [edge_label]
+end define
+
+define node_label
+        'N', [number]', [lg_symbol]', [number] [NL]
+end define
+
+define edge_label
+        'E, [number]', [number]', [lg_symbol] ', [number] [NL]
+end define
+

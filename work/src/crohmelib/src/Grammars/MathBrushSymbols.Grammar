@@ -1,0 +1,21 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% MathBrushSymbols.Grammar
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Feb 13 2013 22:07:18
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+tokens
+    texsymbol "\\[\a\\]+"
+end tokens
+
+define mbsymbol_id
+    [id] | [texsymbol] | [number] 
+	| ', | '. | '+ | '- | '= | '* | '! | '( | ') 
+	| '{ | '} | '[ | '] | '| 
+	| '< | '> 
+	| 'COMMA
+	| [stringlit]  % for commas, other special characters.
+end define

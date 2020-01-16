@@ -1,0 +1,7 @@
+work/model/attention_maxlen*
+work/log/
+work/data/train/
+work/data/valid/
+work/data/test/
+work/data/test_symlg/
+*.pyc

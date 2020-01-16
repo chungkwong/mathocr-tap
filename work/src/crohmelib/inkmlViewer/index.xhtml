@@ -1,0 +1,281 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN" "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<title>CROHME InkML Viewer</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>	
+		<style type="text/css">
+			
+			
+			div.button
+			{
+				display: inline-block;
+				font-size: 16px;
+				padding: 5px;
+				border-style: solid;
+				border-color: #888;
+				border-width: 1px;
+				border-radius: 3px;
+				width: 100px;
+				
+				background: rgb(234,234,234); /* Old browsers */
+				background: -moz-linear-gradient(top, rgba(234,234,234,1) 0%, rgba(202,202,202,1) 50%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(234,234,234,1)), color-stop(50%,rgba(202,202,202,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top, rgba(234,234,234,1) 0%,rgba(202,202,202,1) 50%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top, rgba(234,234,234,1) 0%,rgba(202,202,202,1) 50%,rgba(237,237,237,1) 100%); /* Opera11.10+ */
+				background: -ms-linear-gradient(top, rgba(234,234,234,1) 0%,rgba(202,202,202,1) 50%,rgba(237,237,237,1) 100%); /* IE10+ */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaeaea', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+				background: linear-gradient(top, rgba(234,234,234,1) 0%,rgba(202,202,202,1) 50%,rgba(237,237,237,1) 100%); /* W3C */
+				background: linear-gradient(top, rgba(217,234,249,1) 0%,rgba(144,193,236,1) 24%,rgba(39,149,245,1) 50%,rgba(119,179,231,1) 79%,rgba(161,203,239,1) 100%); /* W3C */
+			}
+			div.button:hover
+			{
+				cursor: pointer;
+				
+				background: rgb(242,242,242); /* Old browsers */
+				background: -moz-linear-gradient(top, rgba(242,242,242,1) 0%, rgba(221,221,221,1) 50%, rgba(243,243,243,1) 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(242,242,242,1)), color-stop(50%,rgba(221,221,221,1)), color-stop(100%,rgba(243,243,243,1))); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top, rgba(242,242,242,1) 0%,rgba(221,221,221,1) 50%,rgba(243,243,243,1) 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top, rgba(242,242,242,1) 0%,rgba(221,221,221,1) 50%,rgba(243,243,243,1) 100%); /* Opera11.10+ */
+				background: -ms-linear-gradient(top, rgba(242,242,242,1) 0%,rgba(221,221,221,1) 50%,rgba(243,243,243,1) 100%); /* IE10+ */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f2f2', endColorstr='#f3f3f3',GradientType=0 ); /* IE6-9 */
+				background: linear-gradient(top, rgba(242,242,242,1) 0%,rgba(221,221,221,1) 50%,rgba(243,243,243,1) 100%); /* W3C */
+			}
+			div.button_down
+			{
+				display: inline-block;
+				font-size: 16px;
+				padding: 5px;
+				border-style: solid;
+				border-color: #888;
+				border-width: 1px;
+				border-radius: 3px;			
+				width: 100px;
+			
+				background: rgb(238,228,198); /* Old browsers */
+				background: -moz-linear-gradient(top, rgba(238,228,198,1) 0%, rgba(223,206,153,1) 50%, rgba(239,229,201,1) 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(238,228,198,1)), color-stop(50%,rgba(223,206,153,1)), color-stop(100%,rgba(239,229,201,1))); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top, rgba(238,228,198,1) 0%,rgba(223,206,153,1) 50%,rgba(239,229,201,1) 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top, rgba(238,228,198,1) 0%,rgba(223,206,153,1) 50%,rgba(239,229,201,1) 100%); /* Opera11.10+ */
+				background: -ms-linear-gradient(top, rgba(238,228,198,1) 0%,rgba(223,206,153,1) 50%,rgba(239,229,201,1) 100%); /* IE10+ */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eee4c6', endColorstr='#efe5c9',GradientType=0 ); /* IE6-9 */
+				background: linear-gradient(top, rgba(238,228,198,1) 0%,rgba(223,206,153,1) 50%,rgba(239,229,201,1) 100%); /* W3C */
+			}
+			
+			div.button_down:hover
+			{
+				cursor: pointer;
+			}
+			
+			svg
+			{
+				border: 1px dashed black;
+				padding: 10px;
+			}
+
+			path
+			{
+				fill: none;
+				/*stroke: rgba(0,0,0,1.0);*/
+				/*stroke-width: 8;*/
+				/*
+				stroke-linecap: butt;
+				stroke-linejoin: butt;
+				*/
+			}
+			
+			path.invisible
+			{
+				stroke: rgba(0,0,0,0.0);
+				stroke-width: 20;
+			}
+			
+			circle
+			{
+				stroke-width: 1;
+				stroke: black;
+			}
+			
+			circle.first_point
+			{
+				fill: #00F;
+			}
+			
+			circle.mid_point
+			{
+				fill: #FF0;
+			}
+			
+			circle.end_point
+			{
+				fill: #F00;
+			}
+			table
+			{				
+				margin-left: auto;
+				margin-right: auto;				
+				/*border: 1px dashed black;*/
+				padding: 10px;
+			}
+			
+			td.attribute_name
+			{
+				padding-right: 10px;
+				text-align: left;
+			}
+			
+			td.attribute_value
+			{
+				padding-left: 10px;
+				text-align: right;
+			}
+			
+			th
+			{
+				font-size: 20px;
+			}
+			
+			div#math_div
+			{
+				padding-left: 30px;
+				padding-right: 30px;
+				font-size: 200%;
+			}
+			
+			/*div#content {
+			}*/
+			
+			div#classification_div {
+				background-color: #eee;
+				width: 200px;
+				font-size: 0.8em;
+				border: 1px solid #d5d5d5;
+				height: 200px;
+				max-height: 200px;
+				margin: 0;
+			}
+			
+			.classification_div_element {
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+			
+			.classification_div_index {
+				color: #666;
+				margin-right: 5px;
+				display: none;
+			}
+			.classification_div_index:before {
+				content: "[";
+				color: #666;
+			}
+			.classification_div_index:after {
+				content: "]";
+				color: #666;
+			}			
+			
+			.classification_div_symbol {
+				margin-right: 5px;			
+			}
+			
+			.classification_div_prob {
+				color: #444;
+			}
+			.classification_div_prob:before {
+				content: "(";
+				color: #444;
+			}
+			.classification_div_prob:after {
+				content: ")";
+				color: #444;
+			}
+			
+			.classification_div_table {
+				margin: 5px;
+			}
+			
+			.classification_div_table div {
+				margin: 0;
+				padding: 0;
+				text-align: left;
+			}
+		</style>
+		<!--<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>-->
+
+	</head>
+	
+	<body style="text-align:center;">		
+		
+		<font face="helvetica,arial">
+		<div id="content">
+			<table>
+			<tr>
+				<td>
+				<A HREF="http://www.cs.rit.edu/~dprl">
+				<img align="left" width="250" src="DPRL_Logo_Option_01.png"/>
+				</A>
+			</td>
+
+			 <td>
+				<div align="left">	  
+					<b>2016 CROHME InkML Viewer (v2)</b> <i>(R. Pospesel, K. Hart and R. Zanibbi)</i>
+				<form id="inkml_form" action="">
+				<input name="Files" type="file" id="inkml_input" multiple=""/> 
+				</form>
+				</div>
+			</td>
+						</tr>
+		</table>
+
+		<hr/>
+			<p style="text-align:left;margin-left:30px;margin-right:30px;line-height:140%;">
+			
+					<b>Instructions:</b>
+					Upload one or more CROHME InkML files using the "Browse" button.  Navigate through the expressions using the <b>left/ right arrow keys</b> or the Prev and Next buttons.  <b>Click on the stroke image</b> to "replay" the drawing of an expression.  <b>Hover the mouse over a stroke</b> to see samples and highlight the correponding symbol in the rendered MathML.  
+					</p>
+
+
+			<div style="margin: 30px;">
+				<div id="prev_button" class="button" onselectstart="return false;" onmousedown="this.className='button_down'; event.preventDefault()" onmouseup="this.className='button'" onmouseout="this.className='button'">Prev</div>
+				<div id="current_index" style="width: 150px; font-size: 20px;display: inline-block;"></div>
+				<div id="next_button" class="button" onselectstart="return false;" onmousedown="this.className='button_down'; event.preventDefault()" onmouseup="this.className='button'" onmouseout="this.className='button'">Next</div>
+			</div>
+		</div>
+			
+				
+			<!--
+			<table  id="attribute_table">
+				<tr>
+					<th colspan="2">Attributes</th>
+					<th>MathML</th>
+				</tr>
+				<tr>
+					<td class="attribute_name">Filename:</td>
+					<td class="attribute_value" id="current_math"></td>
+					<td rowspan="10"><div id="math_div"/></td>
+				</tr>
+			</table>
+			-->
+			<!-- Laying out the dynamic data -->
+			<div id="table_div">
+			</div> 
+			<div id="ink_div" style="margin: 30px;">
+			</div>
+		
+			<!-- <div id="chart_div" style="margin: 30px;">
+			</div>			-->
+		
+
+
+					
+		<script type="text/javascript" src="string_builder.js"/>
+		<script type="text/javascript" src="base64.js"/>
+		<script type="text/javascript" src="code.js"/>   
+
+		</font>
+	</body>
+	
+</html>

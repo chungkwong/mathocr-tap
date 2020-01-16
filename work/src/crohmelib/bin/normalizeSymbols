@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# A simple script of perl pattern replacement calls to normalize symbol
+# labels for CROHME 2013.
+#
+# R. Zanibbi
+
+if [ $# -lt 1 ]
+then
+	echo "CROHMELib CROHME .inkml Symbol Label Normalizer"
+	echo "Copyright (c) R. Zanibbi, H. Mouchere, 2012-2014"
+	echo ""
+	echo "Usage: normalizeSymbols <inkml_dir>"
+	echo ""
+	echo "Applies a series of symbol pattern replacements to all files"
+	echo "in <inkml_dir>. This is currently an ad-hoc list of patterns"
+	echo "and replacements (see script source for details)."
+	echo ""
+	exit 0
+fi
+
+
+dirIn=$1
+if ! [ -d $dirIn ]
+then
+	echo "Directory \"$dirIn\" does not exist."
+	exit 1
+fi
+
+# Replacing unicode patterns (e.g. from MfrDB) 
+
+perl -p -i -e "s/\342\213\205/\./g;
+	s/\342\206\222/rightarrow/g;
+	s/\342\210\221/sum/g;
+	s/\342\210\253/int/g;
+	s/\317\200/pi/g;
+	s/\342\211\244/leq/g;
+	s/\342\211\245/geq/g;
+	s/\342\210\236/infty/g;
+	s/\342\200\262/prime/g;
+	s/\303\227/times/g;
+	s/\342\210\225/\//g;
+	s/\316\261/alpha/g;
+	s/\316\262/beta/g;
+	s/\302\261/pm/g;" $dirIn/*.inkml
+
+
+# Bugs (or Unicode duplicates?)
+perl -p -i -e "s/\342\205\206/d/g;s/\342\205\207/e/g;s/\342\205\210/i/g" $dirIn/*.inkml
+
+
+# Unicode name identification in KME2G3 files.
+perl -p -i -e "s/\354\235\264\355\203\235\355\227\214/Name_Removed/g" $dirIn/*.inkml
+
+# Replacing other patterns
+perl -p -i -e "s/ctdot/\./g;s/>le</>leq</g;s/>exist</>exists</g" $dirIn/*.inkml

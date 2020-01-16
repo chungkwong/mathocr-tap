@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% MathBrushSCG.Grammar
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Feb 13 2013 22:09:31
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+include "Grammars/MathBrushSymbols.Grammar"
+
+define SCG_Ink_File
+	'SCG_INK [newline]
+	[stroke_count] [newline]
+	[repeat stroke_data]
+
+	[repeat newline]
+	'ANNOTATIONS [newline]
+	[repeat mb_annotation]
+
+    [opt operator_tree]
+
+end define
+
+define stroke_count
+	[number]
+end define
+
+define coordinate
+	[number] [number] [newline] % (x,y) pairs, written as "x y".
+end define
+
+define stroke_data
+	[number] [newline] % number of points.
+	[repeat coordinate]
+end define
+
+define symbol_label
+    % List is a list of numerical stroke identifiers.
+    'SYMBOL '< [list number] '> [mbsymbol_id] [newline]
+end define
+
+define symbol_mapping
+    % Not essential for CROHME.
+    'SYMBOLMAP '< [list number] '> [number] [newline]
+end define
+
+define relationship_label
+    'LINK '< [list number] '> [mbsymbol_id] '< [list number] '> [newline]
+end define
+
+define mb_annotation
+		[symbol_label]
+	|	[symbol_mapping]
+    |   [relationship_label]
+	|	[newline]  % for line-based parsing...
+end define
+
+define operator_tree    
+    % Match lisp syntax as just a list of tokens.
+    'TREE [repeat token]
+end define
+

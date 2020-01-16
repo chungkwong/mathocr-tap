@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# NOTE:
+#
+# Make sure that CROHMELibDir and LgEvalDir are defined in your shell
+# enviroment, e.g. by including:
+#	
+#	export CROHMELibDir=<path_to_CROHMELib> 
+#	export LgEvalDir=<path_to_LgEval>
+#	export PATH=$PATH:$CROHMELibDir/bin:$LgEvalDir/bin
+#
+# in your .bashrc file for bash shell.
+
+if [ $# -lt 1 ]
+then
+	echo "CROHMELib Grammar to Text Converter"
+	echo "Copyright (c) R. Zanibbi, H. Mouchere, 2012-2014"
+	echo ""
+	echo "Usage: xmlGrammar2txt grammarFile.xml"
+	echo ""
+	echo "Translates a CROHME grammar in XML format to a human-readable"
+	echo "production rule format, which is written to standard output (STDOUT)."
+	exit 0
+fi
+
+txl -w 256 -I $CROHMELibDir/src -I $CROHMELibDir/src/Grammars $1 convGrammar.Txl | perl -p -i -e "s/\"//g"

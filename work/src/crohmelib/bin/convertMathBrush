@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# NOTE:
+#
+# Make sure that CROHMELibDir and LgEvalDir are defined in your shell
+# enviroment, e.g. by including:
+#	
+#	export CROHMELibDir=<path_to_CROHMELib> 
+#	export LgEvalDir=<path_to_LgEval>
+#	export PATH=$PATH:$CROHMELibDir/bin:$LgEvalDir/bin
+#
+# in your .bashrc file for bash shell.
+
+if [ $# -lt 1 ] 
+then
+	echo "CROHMELib *Batch* MathBrush .ink to CROHME .inkml Converter"
+	echo "Copyright (c) R. Zanibbi, H. Mouchere, 2012-2014"
+	echo ""
+	echo "Usage: mb2crohme <dir>"
+	echo ""
+	echo "Converts all MathBrush .ink files in <dir> to CROHME .inkml files"
+	echo "  written to the current directory."
+	exit 0
+fi
+
+BNAME=`basename $1`
+CONVDIR=${BNAME}_inkml
+
+if [ ! -d $CONVDIR ]
+then
+	mkdir $CONVDIR
+fi
+
+# Move to 'conversion' directory, and convert each file.
+cd $CONVDIR
+for file in ../$1/*.ink
+do
+	$CROHMELibDir/bin/mb2crohme $file 2> /dev/null
+	if [ $? -ne 0 ]
+	then
+		BASEFILE=`basename $file`
+		echo "  !! Error converting $BASEFILE"
+	fi
+done
+
+# Remove any temp file from error output.
+rm -f temp*

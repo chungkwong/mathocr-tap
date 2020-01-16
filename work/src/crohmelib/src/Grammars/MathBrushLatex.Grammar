@@ -1,0 +1,164 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% MathBrushLatex.Grammar
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revision History
+% v 1.0.0 Original Version: Richard Zanibbi, Feb 26 2013 11:01:14
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+define CROHME2013_texToken
+	 a
+  |  b
+  |  c
+  |  d
+  |  e
+  |  A
+  |  B
+  |  C
+  |  F
+  |  i
+  |  j
+  |  k
+  |  n
+  |  x
+  |  y
+  |  z
+  |  0
+  |  1
+  |  2
+  |  3
+  |  4
+  |  5
+  |  6
+  |  7
+  |  8
+  |  9
+  |  '\alpha
+  |  '\beta
+  |  '\gamma
+  |  '\phi
+  |  '\pi
+  |  '\theta
+  |  '\infty
+  |  +
+  |  -
+  |  '\pm
+  |  '\div
+  |  '\times
+  |  '\sum
+  |  '\log
+  |  '\sin
+  |  '\cos
+  |  '\tan
+  |  '\ldots
+  |  '\eq
+  |  '\leq
+  |  '\lt
+  |  '\geq
+  |  =
+  |  '\rightarrow
+  |  '\lim
+  |  '\int
+  |  (
+  |  )
+  |  '\{
+  |  '\}
+  |	 '{
+  |	 '}
+  |  '[
+  |  ']
+  |  '\sqrt
+  |  !
+  |  X
+  |  Y
+  |  '\gt
+  |  t
+  |  f
+  |  g
+  |  m
+  |  r
+  |  p
+  |  /
+  |  ',
+  |  .
+  |  '\exists
+  |  '\forall
+  |  '\in
+  |  >
+  |  <
+  |  '\left
+  |  '\right
+  |  '\frac
+  |  '\cdots
+  |  '\prime
+  |  P
+  |  u
+  |  v
+  |  E
+  |  T
+  |  s
+  |  V
+  |  g
+  |  M
+  |  R
+  |  q
+  |  '\partial
+  |  h 
+  |  '\lambda 
+  |  '\omega
+  |  S
+  |  N
+  |  '\ast
+  |  '*
+  |  '\mu
+  |  I
+  |  L
+  |  H
+  |  '\Delta
+  |  '\sigma
+  |  G
+  |  '\wedge
+  |  '\vee
+  |  '\overline
+  |  '\supset
+  |  '\subset
+  |  '\cup
+  |  '\cap
+  |  '\Real
+  |  l
+  |  w
+  |  o
+  |  '|
+  |  '\rangle
+  |  '\langle
+  |  '\mbox
+  |  '\mathrm
+
+  % Additions - missing relationship operators, allow more symbols through...
+  |	 '^
+  |  '_
+  |  [id]
+  |	 'COMMA
+  |	 [stringlit]
+  |	 [number]
+  |	'\!
+  |	'\    % for spaces.
+  %|  [texsymbol]
+end define
+
+define tex_content
+	   [CROHME2013_texToken]
+	|  [CROHME2013_texToken] [SP] [tex_content]
+end define
+
+define mb_latex
+	'\documentclass '['12'pt ']'{ 'article'} [NL]
+	'\pagestyle{'empty} [NL]
+	'\begin{document} [NL]
+	'\begin{displaymath} [NL]
+	 [tex_content] [NL]
+	'\end'{displaymath'} [NL]
+	'\end'{document'} [NL]
+	| [empty]
+end define
