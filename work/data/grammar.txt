@@ -1,0 +1,111 @@
+start	beginning	remaining
+beginning	operand
+	symbol2
+	\frac	group	group
+remaining
+	term	remaining
+term	beginning
+	_	group
+	^	group
+group	{	start	}
+operand	symbol1
+	\sqrt	sqrt
+	(	start	)
+	[	start	]
+	\{	start	\}
+sqrt	group
+	[	start	]	group
+symbol1	0
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	A
+	B
+	C
+	E
+	F
+	G
+	H
+	I
+	L
+	M
+	N
+	P
+	R
+	S
+	T
+	V
+	X
+	Y
+	a
+	b
+	c
+	d
+	e
+	f
+	g
+	h
+	i
+	j
+	k
+	l
+	m
+	n
+	o
+	p
+	q
+	r
+	s
+	t
+	u
+	v
+	w
+	x
+	y
+	z
+	\Delta
+	\alpha
+	\beta
+	\gamma
+	\theta
+	\lambda
+	\pi
+	\sigma
+	\phi
+	\mu
+	<
+	>
+	!
+	/
+	\infty
+	\sin
+	\cos
+	\tan
+	\log
+	\lim
+	\sum
+	\int
+symbol2	+
+	-
+	|
+	\pm
+	\times
+	\div
+	=
+	'
+	,
+	.
+	\ldots
+	\rightarrow
+	\exists
+	\in
+	\neq
+	\leq
+	\geq
+	\forall

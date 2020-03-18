@@ -23,6 +23,7 @@ if test `whoami` = 'aistudio';then
 	export THEANO_FLAGS=device=cuda,floatX=float32;
 	export CPLUS_INCLUDE_PATH=/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/include/c++/7.3.0:/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/usr/include/:/usr/include:/usr/local/cuda/include;
 	export C_INCLUDE_PATH=/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/usr/include/:/usr/include:/usr/local/cuda/include;
+	python3 -m pip install bs4 lxml numpy
 elif command -v nvcc >/dev/null 2>&1;then
 	echo "Cuda detected";
 	export THEANO_FLAGS=device=cuda,floatX=float32;

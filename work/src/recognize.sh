@@ -24,6 +24,7 @@ else
 	#python gen_ascii_pkl.py $TMP_DIRECTORY
 	python -u ./translate.py -k 10 \
 		../data/dictionary.txt \
+		../data/grammar.txt \
 		$TMP_DIRECTORY/ \
 		$TMP_DIRECTORY/test_decode_result.txt \
 		$TMP_DIRECTORY/test.wer \
