@@ -172,4 +172,5 @@ if __name__ == "__main__":
     verify('../data/train/caption.txt',grammar,worddicts)
     verify('../data/valid/caption.txt',grammar,worddicts)
     verify('../data/test/caption.txt',grammar,worddicts)
+    #verify('../data/corpus.txt',grammar,worddicts)
 

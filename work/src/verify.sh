@@ -12,3 +12,6 @@ cd convert2symLG
 cd $LOG_DIRECTORY
 evaluate lg ../../data/test_symlg
 cat Results_lg/Summary.txt
+rm -r tex 
+rm -r lg
+rm -r Results_lg/Metrics

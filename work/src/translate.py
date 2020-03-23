@@ -25,6 +25,7 @@ from collections import OrderedDict
 from data_iterator import dataIterator, dataIterator_valid
 
 from grammar import compileGrammar,loadGrammar,parseStart,parseNext,isParseFailed,isParseFinished
+from lm import load_language_model
 
 profile = False
 
@@ -44,7 +45,7 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
         assert not stochastic, \
             'Beam search does not support stochastic sampling'
 
-    model_count=len(models)+0.0
+    total_weight=0.0
     sample = []
     sample_score = []
     if stochastic:
@@ -59,7 +60,8 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
 
     # get initial state of decoder rnn and encoder context
     status = []
-    for f_init,f_next,options in models:
+    for f_init,f_next,options,weight in models:
+        total_weight = total_weight + weight
         ret = f_init(x)
         next_state, ctx0 = ret[0], ret[1]
         next_w = -1 * numpy.ones((1,)).astype('int64')  # bos indicator
@@ -69,7 +71,7 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
             if options['down_sample'][i]==1:
                 SeqL = math.ceil(SeqL / 2.)
         next_alpha_past = 0.0 * numpy.ones((1, int(SeqL))).astype('float32') # start position
-        status.append({'next_state':next_state, 'ctx0':ctx0, 'next_w':next_w, 'next_state':next_state, 'next_alpha_past':next_alpha_past,'f_next':f_next})
+        status.append({'next_state':next_state, 'ctx0':ctx0, 'next_w':next_w, 'next_state':next_state, 'next_alpha_past':next_alpha_past,'f_next':f_next,'weight':weight})
     
 
     for ii in xrange(maxlen):
@@ -79,8 +81,8 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
             ctx = numpy.tile(state['ctx0'], [live_k, 1])
             ret = f_next(state['next_w'], ctx, state['next_state'], state['next_alpha_past'])
             state['next_w'], state['next_state'], state['next_alpha_past'] = ret[1], ret[2], ret[3]
-            next_p += ret[0]
-        next_p /= model_count
+            next_p += ret[0] * state['weight']
+        next_p /= total_weight
 
         if stochastic:
             if argmax:
@@ -174,6 +176,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
     grammar=compileGrammar(loadGrammar(grammar_target,worddicts))
 
     trng = RandomStreams(1234)
+    
     models=[]
     # load model model_options
     for model_file in model_files:
@@ -184,7 +187,12 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
         params = load_params(model_file, params)
         tparams = init_tparams(params)
         f_init, f_next = build_sampler(tparams, options, trng)
-        models.append((f_init,f_next,options))
+        models.append((f_init,f_next,options,0.8))
+
+    for lm_file in []:
+        print('Loading language model: %s' % lm_file)
+        f_init,f_next,options=load_language_model(lm_file)
+        models.append((f_init,f_next,options,0.2))
 
     valid,valid_uid_list = dataIterator_valid(data_path,
                          worddicts, batch_size=1, maxlen=250)

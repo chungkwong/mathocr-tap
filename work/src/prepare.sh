@@ -6,7 +6,7 @@ if ! [ -d ../data/test ] ; then
 		conda install theano pygpu python=2.7 pandoc --prefix /home/aistudio/external-libraries
 		ln -s /home/aistudio/external-libraries/bin/x86_64-conda_cos6-linux-gnu-g++ /home/aistudio/external-libraries/bin/g++
 		ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so /home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/lib/libcudnn.so;
-		mkdir ../data ../model ../log
+		mkdir ../data ../model ../log ../lm
 		du -hs /home/aistudio/external-libraries
 	fi
 	echo 'Preparing data ...'

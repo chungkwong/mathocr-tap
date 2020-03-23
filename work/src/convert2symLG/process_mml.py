@@ -51,6 +51,16 @@ def add_ID(mml):
  
         elif subtree.name in ['mfrac','mroot','msqrt','mtr','mtable','mtd']:
             subtree['xml:id']='_'+str(count)
+        
+        if subtree.name == 'msub':
+            start=subtree.findChild()
+            if start.name=='mo' and start.getText().strip() in ['∑','lim']:
+                subtree.name='munder'
+        elif subtree.name == 'msubsup':
+            start=subtree.findChild()
+            if start.name=='mo' and start.getText().strip() in ['∑','lim']:
+                subtree.name='munderover'
+    
     return mml
 
 #return mathml unicodes into latex labels

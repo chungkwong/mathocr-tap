@@ -19,7 +19,7 @@ for file in `cat $1`
 do	
 	txtDir="$2/$file.txt"
 	mmlDir="$3/$file.mml"
-	pandoc --mathml -s $txtDir -o $mmlDir
+	pandoc --mathml --quiet -s $txtDir -o $mmlDir
       
 done
 

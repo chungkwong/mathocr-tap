@@ -31,7 +31,7 @@ do
 		
 		txtDir=$file
 		mmlDir="mml_temp/$BNAME.mml"
-        	pandoc --mathml -s $txtDir -o $mmlDir
+        	pandoc --mathml --quiet -s $txtDir -o $mmlDir
       	fi
 	
 done
