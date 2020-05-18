@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source prepare.sh
-python -u ./translate.py -k 10 \
+python3 -u ./translate.py -k 10 \
 	../data/dictionary.txt \
 	../data/grammar.txt \
 	../data/test/ \

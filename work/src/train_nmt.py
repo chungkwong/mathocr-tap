@@ -6,7 +6,7 @@ sys.path.append('/home/aistudio/external-libraries')
 from nmt import train
 
 def main(job_id, params):
-    print params
+    print(params)
     validerr = train(saveto=params['model'][0],
                      tmpdir=params['tmpdir'],
                      reload_=params['reload'][0],

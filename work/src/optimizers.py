@@ -6,10 +6,10 @@ import numpy
 profile = False
 
 def itemlist(tparams):
-    return [vv for kk, vv in tparams.iteritems()]
+    return [vv for kk, vv in tparams.items()]
 
 def itemlist_name(tparams):
-    return [kk for kk, vv in tparams.iteritems()]
+    return [kk for kk, vv in tparams.items()]
 
 """
 General Optimizer Structure: (adadelta, adam, rmsprop, sgd)
@@ -37,7 +37,7 @@ Returns
 def adam(lr, tparams, grads, inp, cost):
     gshared = [theano.shared(p.get_value() * 0.,
                              name='%s_grad' % k)
-               for k, p in tparams.iteritems()]
+               for k, p in tparams.items()]
     gsup = [(gs, g) for gs, g in zip(gshared, grads)]
 
     f_grad_shared = theano.function(inp, cost, updates=gsup, profile=profile)
@@ -76,13 +76,13 @@ def adam(lr, tparams, grads, inp, cost):
 def adadelta(lr, tparams, grads, inp, cost):
     zipped_grads = [theano.shared(p.get_value() * numpy.float32(0.),
                                   name='%s_grad' % k)
-                    for k, p in tparams.iteritems()]
+                    for k, p in tparams.items()]
     running_up2 = [theano.shared(p.get_value() * numpy.float32(0.),
                                  name='%s_rup2' % k)
-                   for k, p in tparams.iteritems()]
+                   for k, p in tparams.items()]
     running_grads2 = [theano.shared(p.get_value() * numpy.float32(0.),
                                     name='%s_rgrad2' % k)
-                      for k, p in tparams.iteritems()]
+                      for k, p in tparams.items()]
 
     zgup = [(zg, g) for zg, g in zip(zipped_grads, grads)]
     rg2up = [(rg2, 0.95 * rg2 + 0.05 * (g ** 2))
@@ -107,13 +107,13 @@ def adadelta(lr, tparams, grads, inp, cost):
 def rmsprop(lr, tparams, grads, inp, cost):
     zipped_grads = [theano.shared(p.get_value() * numpy.float32(0.),
                                   name='%s_grad' % k)
-                    for k, p in tparams.iteritems()]
+                    for k, p in tparams.items()]
     running_grads = [theano.shared(p.get_value() * numpy.float32(0.),
                                    name='%s_rgrad' % k)
-                     for k, p in tparams.iteritems()]
+                     for k, p in tparams.items()]
     running_grads2 = [theano.shared(p.get_value() * numpy.float32(0.),
                                     name='%s_rgrad2' % k)
-                      for k, p in tparams.iteritems()]
+                      for k, p in tparams.items()]
 
     zgup = [(zg, g) for zg, g in zip(zipped_grads, grads)]
     rgup = [(rg, 0.95 * rg + 0.05 * g) for rg, g in zip(running_grads, grads)]
@@ -125,7 +125,7 @@ def rmsprop(lr, tparams, grads, inp, cost):
 
     updir = [theano.shared(p.get_value() * numpy.float32(0.),
                            name='%s_updir' % k)
-             for k, p in tparams.iteritems()]
+             for k, p in tparams.items()]
     updir_new = [(ud, 0.9 * ud - 1e-4 * zg / tensor.sqrt(rg2 - rg ** 2 + 1e-4))
                  for ud, zg, rg, rg2 in zip(updir, zipped_grads, running_grads,
                                             running_grads2)]
@@ -140,7 +140,7 @@ def rmsprop(lr, tparams, grads, inp, cost):
 def sgd(lr, tparams, grads, x, mask, y, cost):
     gshared = [theano.shared(p.get_value() * 0.,
                              name='%s_grad' % k)
-               for k, p in tparams.iteritems()]
+               for k, p in tparams.items()]
     gsup = [(gs, g) for gs, g in zip(gshared, grads)]
 
     f_grad_shared = theano.function([x, mask, y], cost, updates=gsup,
@@ -155,22 +155,22 @@ def sgd(lr, tparams, grads, x, mask, y, cost):
 def adadelta_weightnoise(lr, tparams_miu, tparams_sigma, grads_miu, grads_sigma, inp, cost):
     zipped_grads_miu = [theano.shared(p.get_value() * numpy.float32(0.),
                                   name='%s_grad' % k)
-                    for k, p in tparams_miu.iteritems()]
+                    for k, p in tparams_miu.items()]
     running_up2_miu = [theano.shared(p.get_value() * numpy.float32(0.),
                                  name='%s_rup2' % k)
-                   for k, p in tparams_miu.iteritems()]
+                   for k, p in tparams_miu.items()]
     running_grads2_miu = [theano.shared(p.get_value() * numpy.float32(0.),
                                     name='%s_rgrad2' % k)
-                      for k, p in tparams_miu.iteritems()]
+                      for k, p in tparams_miu.items()]
     zipped_grads_sigma = [theano.shared(p.get_value() * numpy.float32(0.),
                                   name='%s_grad' % k)
-                    for k, p in tparams_sigma.iteritems()]
+                    for k, p in tparams_sigma.items()]
     running_up2_sigma = [theano.shared(p.get_value() * numpy.float32(0.),
                                  name='%s_rup2' % k)
-                   for k, p in tparams_sigma.iteritems()]
+                   for k, p in tparams_sigma.items()]
     running_grads2_sigma = [theano.shared(p.get_value() * numpy.float32(0.),
                                     name='%s_rgrad2' % k)
-                      for k, p in tparams_sigma.iteritems()]
+                      for k, p in tparams_sigma.items()]
     zgup_miu = [(zg, g) for zg, g in zip(zipped_grads_miu, grads_miu)]
     rg2up_miu = [(rg2, 0.95 * rg2 + 0.05 * (g ** 2))
              for rg2, g in zip(running_grads2_miu, grads_miu)]

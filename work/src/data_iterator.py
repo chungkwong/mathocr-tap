@@ -1,9 +1,9 @@
 import numpy
 
-import cPickle as pkl
 import gzip
 import numpy as np
 import os
+import sys
 
 def fopen(filename, mode='r'):
     if filename.endswith('.gz'):
@@ -24,10 +24,10 @@ def loadFeature(feature_path,scp_path):
             mat = np.loadtxt(feature_file)
             sentNum = sentNum + 1
             features[key] = mat
-            if sentNum / 500 == sentNum * 1.0 / 500:
-                print 'process sentences ', sentNum
+            if sentNum // 500 == sentNum * 1.0 / 500:
+                print('process sentences ', sentNum)
     scpFile.close()
-    print 'load ascii file done. sentence number ',sentNum
+    print('load ascii file done. sentence number ',sentNum)
     return features
 
 def loadAlign(feature_path,scp_path,align_path):
@@ -64,10 +64,10 @@ def loadAlign(feature_path,scp_path,align_path):
                         else:
                             align[(penup_index[pos-1]+1):(penup_index[pos]+1), wordNum] = 1
             alignment[key] = align
-            if sentNum / 500 == sentNum * 1.0 / 500:
-                print 'process sentences ', sentNum
+            if sentNum // 500 == sentNum * 1.0 / 500:
+                print('process sentences ', sentNum)
     scpFile.close()
-    print 'load align file done. sentence number ',sentNum
+    print('load align file done. sentence number ',sentNum)
     return alignment
 
 def dataIterator(base_path,dictionary,batch_size,maxlen):
@@ -87,20 +87,20 @@ def dataIterator(base_path,dictionary,batch_size,maxlen):
         uid=tmp[0]
         w_list=[]
         for w in tmp[1:]:
-            if dictionary.has_key(w):
+            if w in dictionary:
                 w_list.append(dictionary[w])
             else:
-                print 'a word not in the dictionary !! sentence ',uid,'word ', w
+                print('a word not in the dictionary !! sentence ',uid,'word ', w)
                 sys.exit()
         targets[uid]=w_list
 
 
 
     sentLen={}
-    for uid,fea in features.iteritems():
+    for uid,fea in features.items():
         sentLen[uid]=len(fea)
 
-    sentLen= sorted(sentLen.iteritems(), key=lambda d:d[1]) # sorted by sentence length,  return a list with each triple element
+    sentLen= sorted(sentLen.items(), key=lambda d:d[1]) # sorted by sentence length,  return a list with each triple element
 
 
     feature_batch=[]
@@ -116,7 +116,7 @@ def dataIterator(base_path,dictionary,batch_size,maxlen):
         ali=aligns[uid]
         lab=targets[uid]
         if len(lab)>maxlen:
-            print 'sentence', uid, 'length bigger than', maxlen, 'ignore'
+            print('sentence', uid, 'length bigger than', maxlen, 'ignore')
         else:
             if i==batch_size: # a batch is full
                 feature_total.append(feature_batch)
@@ -142,9 +142,9 @@ def dataIterator(base_path,dictionary,batch_size,maxlen):
     label_total.append(label_batch)
     alignment_total.append(alignment_batch)
 
-    print 'total ',len(feature_total), 'batch data loaded'
+    print('total ',len(feature_total), 'batch data loaded')
 
-    return zip(feature_total,label_total, alignment_total)
+    return list(zip(feature_total,label_total, alignment_total))
 
 def dataIterator_valid(base_path,dictionary,batch_size,maxlen):
     
@@ -162,20 +162,20 @@ def dataIterator_valid(base_path,dictionary,batch_size,maxlen):
         uid=tmp[0]
         w_list=[]
         for w in tmp[1:]:
-            if dictionary.has_key(w):
+            if w in dictionary:
                 w_list.append(dictionary[w])
             else:
-                print 'a word not in the dictionary !! sentence ',uid,'word ', w
+                print('a word not in the dictionary !! sentence ',uid,'word ', w)
                 sys.exit()
         targets[uid]=w_list
 
 
 
     sentLen={}
-    for uid,fea in features.iteritems():
+    for uid,fea in features.items():
         sentLen[uid]=len(fea)
 
-    sentLen= sorted(sentLen.iteritems(), key=lambda d:d[1]) # sorted by sentence length,  return a list with each triple element
+    sentLen= sorted(sentLen.items(), key=lambda d:d[1]) # sorted by sentence length,  return a list with each triple element
 
 
     feature_batch=[]
@@ -189,7 +189,7 @@ def dataIterator_valid(base_path,dictionary,batch_size,maxlen):
         fea=features[uid]
         lab=targets[uid]
         if len(lab)>maxlen:
-            print 'sentence', uid, 'length bigger than', maxlen, 'ignore'
+            print('sentence', uid, 'length bigger than', maxlen, 'ignore')
         else:
             uidList.append(uid)
             if i==batch_size: # a batch is full
@@ -211,6 +211,6 @@ def dataIterator_valid(base_path,dictionary,batch_size,maxlen):
     feature_total.append(feature_batch)
     label_total.append(label_batch)
 
-    print 'total ',len(feature_total), 'batch data loaded'
+    print('total ',len(feature_total), 'batch data loaded')
 
     return zip(feature_total,label_total),uidList

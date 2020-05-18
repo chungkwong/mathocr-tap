@@ -10,7 +10,7 @@ import theano
 import theano.tensor as tensor
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
-import cPickle as pkl
+import pickle as pkl
 #import ipdb
 import numpy
 import copy
@@ -71,10 +71,10 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
             if options['down_sample'][i]==1:
                 SeqL = math.ceil(SeqL / 2.)
         next_alpha_past = 0.0 * numpy.ones((1, int(SeqL))).astype('float32') # start position
-        status.append({'next_state':next_state, 'ctx0':ctx0, 'next_w':next_w, 'next_state':next_state, 'next_alpha_past':next_alpha_past,'f_next':f_next,'weight':weight})
+        status.append({'ctx0':ctx0, 'next_w':next_w, 'next_state':next_state, 'next_alpha_past':next_alpha_past,'f_next':f_next,'weight':weight})
     
 
-    for ii in xrange(maxlen):
+    for ii in range(maxlen):
         next_p = numpy.zeros((live_k,dictlen)).astype('float32')
         for state in status:
             f_next=state['f_next']
@@ -99,7 +99,7 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
             ranks_flat = cand_flat.argsort()[:(k-dead_k)]
 
             voc_size = next_p.shape[1]
-            trans_indices = ranks_flat / voc_size
+            trans_indices = ranks_flat // voc_size
             word_indices = ranks_flat % voc_size
             costs = cand_flat[ranks_flat]
 
@@ -129,7 +129,7 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
             hyp_states = []
             hyp_alpha_past = []
 
-            for idx in xrange(len(new_hyp_samples)):
+            for idx in range(len(new_hyp_samples)):
                 if new_hyp_samples[idx][-1] == 0: # <eol>
                     if isParseFinished(new_hyp_stack[idx]):
                         sample.append(new_hyp_samples[idx])
@@ -159,7 +159,7 @@ def gen_sample(models, x, grammar, trng=None, k=1, maxlen=30, dictlen=107,
     if not stochastic:
         # dump every remaining one
         if live_k > 0:
-            for idx in xrange(live_k):
+            for idx in range(live_k):
                 sample.append(hyp_samples[idx])
                 sample_score.append(hyp_scores[idx])
 
@@ -171,7 +171,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
     # load source dictionary and invert
     worddicts = load_dict(dictionary_target)
     worddicts_r = [None] * len(worddicts)
-    for kk, vv in worddicts.iteritems():
+    for kk, vv in worddicts.items():
         worddicts_r[vv] = kk
     grammar=compileGrammar(loadGrammar(grammar_target,worddicts))
 
@@ -183,6 +183,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
         print('Loading model: %s' % model_file)
         with open('%s.pkl' % model_file, 'rb') as f:
             options = pkl.load(f)
+        print(options)
         params = init_params(options)
         params = load_params(model_file, params)
         tparams = init_tparams(params)
@@ -235,7 +236,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
             fpp_sample.write('\n')
     fpp_sample.close()
     ud_epoch = (time.time() - ud_epoch_start) 
-    print 'test set decode done, cost time ...', ud_epoch
+    print('test set decode done, cost time ...', ud_epoch)
     os.system('python compute-wer.py ' + saveto + ' ' + os.path.join(data_path,"caption.txt") + ' ' + wer_file)
     fpp=open(wer_file)
     stuff=fpp.readlines()
@@ -245,7 +246,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
     m=re.search('ExpRate (.*)\n',stuff[1])
     valid_sacc=100. * float(m.group(1))
 
-    print 'Valid WER: %.2f%%, ExpRate: %.2f%%' % (valid_per,valid_sacc)
+    print('Valid WER: %.2f%%, ExpRate: %.2f%%' % (valid_per,valid_sacc))
 
 
 if __name__ == "__main__":

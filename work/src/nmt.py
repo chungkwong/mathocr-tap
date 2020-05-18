@@ -5,7 +5,7 @@ import theano
 import theano.tensor as tensor
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
-import cPickle as pkl
+import pickle as pkl
 #import ipdb
 import numpy
 import copy
@@ -28,21 +28,21 @@ import re
 
 # push parameters to Theano shared variables
 def zipp(params, tparams):
-    for kk, vv in params.iteritems():
+    for kk, vv in params.items():
         tparams[kk].set_value(vv)
 
 
 # pull parameters from Theano shared variables
 def unzip(zipped):
     new_params = OrderedDict()
-    for kk, vv in zipped.iteritems():
+    for kk, vv in zipped.items():
         new_params[kk] = vv.get_value()
     return new_params
 
 
 # get the list of parameters: Note that tparams must be OrderedDict
 def itemlist(tparams):
-    return [vv for kk, vv in tparams.iteritems()]
+    return [vv for kk, vv in tparams.items()]
 
 
 # dropout
@@ -63,7 +63,7 @@ def _p(pp, name):
 # initialize Theano shared variables according to the initial parameters
 def init_tparams(params):
     tparams = OrderedDict()
-    for kk, pp in params.iteritems():
+    for kk, pp in params.items():
         tparams[kk] = theano.shared(params[kk], name=kk)
     return tparams
 
@@ -71,7 +71,7 @@ def init_tparams(params):
 # load parameters
 def load_params(path, params):
     pp = numpy.load(path)
-    for kk, vv in params.iteritems():
+    for kk, vv in params.items():
         if kk not in pp:
             warnings.warn('%s is not in the archive' % kk)
             continue
@@ -437,7 +437,7 @@ def gru_cond_layer(tparams, state_below, options, prefix='gru',
 
     dim = tparams[_p(prefix, 'Wcx')].shape[1]
     dimctx = tparams[_p(prefix, 'Wcx')].shape[0]
-    pad = (tparams[_p(prefix, 'conv_Q')].shape[2]-1)/2
+    pad = (tparams[_p(prefix, 'conv_Q')].shape[2]-1)//2
 
     # initial/previous state
     if init_state is None:
@@ -651,7 +651,7 @@ def init_params(options):
                                 nin=ctxdim, nout=options['dim_word'],
                                 ortho=False)
     params = get_layer('ff')[0](options, params, prefix='ff_logit',
-                                nin=options['dim_word']/2,
+                                nin=options['dim_word']//2,
                                 nout=options['dim_target'])
 
     return params
@@ -763,7 +763,7 @@ def build_model(tparams, options):
     # maxout 2
     # maxout layer
     shape = logit.shape
-    shape2 = tensor.cast(shape[2] / 2, 'int64')
+    shape2 = tensor.cast(shape[2] // 2, 'int64')
     shape3 = tensor.cast(2, 'int64')
     logit = logit.reshape([shape[0],shape[1], shape2, shape3]) # seq*batch*256 -> seq*batch*128*2
     logit=logit.max(3) # seq*batch*128
@@ -815,10 +815,10 @@ def build_sampler(tparams, options, trng):
     init_state = get_layer('ff')[1](tparams, ctx_mean, options,
                                     prefix='ff_state', activ='tanh')
 
-    print 'Building f_init...',
+    print('Building f_init...',)
     outs = [init_state, ctx]
     f_init = theano.function([x], outs, name='f_init', profile=profile)
-    print 'Done'
+    print('Done')
 
     # x: 1 x 1
     y = tensor.vector('y_sampler', dtype='int64')
@@ -853,7 +853,7 @@ def build_sampler(tparams, options, trng):
 
     # maxout layer
     shape = logit.shape
-    shape1 = tensor.cast(shape[1] / 2, 'int64')
+    shape1 = tensor.cast(shape[1] // 2, 'int64')
     shape2 = tensor.cast(2, 'int64')
     logit = logit.reshape([shape[0], shape1, shape2]) # batch*256 -> batch*128*2
     logit=logit.max(2) # batch*500
@@ -870,11 +870,11 @@ def build_sampler(tparams, options, trng):
 
     # compile a function to do the whole thing above, next word probability,
     # sampled word for the next target, next hidden state to be used
-    print 'Building f_next..',
+    print('Building f_next..')
     inps = [y, ctx, init_state, alpha_past]
     outs = [next_probs, next_sample, next_state, next_alpha_past]
     f_next = theano.function(inps, outs, name='f_next', profile=profile, on_unused_input='ignore')
-    print 'Done'
+    print('Done')
 
     return f_init, f_next
 
@@ -911,7 +911,7 @@ def gen_sample(tparams, f_init, f_next, x, options, trng=None, k=1, maxlen=30,
         if options['down_sample'][i]==1:
             SeqL = math.ceil(SeqL / 2.)
     next_alpha_past = 0.0 * numpy.ones((1, int(SeqL))).astype('float32') # start position
-    for ii in xrange(maxlen):
+    for ii in range(maxlen):
         ctx = numpy.tile(ctx0, [live_k, 1])
         inps = [next_w, ctx, next_state, next_alpha_past]
         ret = f_next(*inps)
@@ -932,7 +932,7 @@ def gen_sample(tparams, f_init, f_next, x, options, trng=None, k=1, maxlen=30,
             ranks_flat = cand_flat.argsort()[:(k-dead_k)]
 
             voc_size = next_p.shape[1]
-            trans_indices = ranks_flat / voc_size
+            trans_indices = ranks_flat // voc_size
             word_indices = ranks_flat % voc_size
             costs = cand_flat[ranks_flat]
 
@@ -954,7 +954,7 @@ def gen_sample(tparams, f_init, f_next, x, options, trng=None, k=1, maxlen=30,
             hyp_states = []
             hyp_alpha_past = []
 
-            for idx in xrange(len(new_hyp_samples)):
+            for idx in range(len(new_hyp_samples)):
                 if new_hyp_samples[idx][-1] == 0: # <eol>
                     sample.append(new_hyp_samples[idx])
                     sample_score.append(new_hyp_scores[idx])
@@ -980,7 +980,7 @@ def gen_sample(tparams, f_init, f_next, x, options, trng=None, k=1, maxlen=30,
     if not stochastic:
         # dump every remaining one
         if live_k > 0:
-            for idx in xrange(live_k):
+            for idx in range(live_k):
                 sample.append(hyp_samples[idx])
                 sample_score.append(hyp_scores[idx])
 
@@ -1004,10 +1004,10 @@ def pred_probs(f_log_probs, prepare_data, options, iterator, verbose=False):
 
         if numpy.isnan(numpy.mean(probs)):
             #ipdb.set_trace()
-            print 'probs nan'
+            print('probs nan')
 
         if verbose:
-            print >>sys.stderr, '%d samples computed' % (n_done)
+            print('%d samples computed' % (n_done))
 
     return numpy.array(probs)
 
@@ -1021,7 +1021,7 @@ def load_dict(dictFile):
         w=l.strip().split()
         lexicon[w[0]]=int(w[1])
 
-    print 'total words/phones',len(lexicon)
+    print('total words/phones',len(lexicon))
     return lexicon
 
 
@@ -1070,7 +1070,7 @@ def train(dim_word=100,  # word vector dimensionality
 
     worddicts = load_dict(dictionaries[0])
     worddicts_r = [None] * len(worddicts)
-    for kk, vv in worddicts.iteritems():
+    for kk, vv in worddicts.items():
         worddicts_r[vv] = kk
 
     # reload options
@@ -1078,7 +1078,7 @@ def train(dim_word=100,  # word vector dimensionality
         with open('%s.pkl' % saveto, 'rb') as f:
             models_options = pkl.load(f)
 
-    print 'Loading data'
+    print('Loading data')
     train = dataIterator(datasets[0],
                          worddicts,
                          batch_size=batch_size, maxlen=maxlen)
@@ -1086,7 +1086,7 @@ def train(dim_word=100,  # word vector dimensionality
                          worddicts,
                          batch_size=batch_size, maxlen=maxlen)
 
-    print 'Building model'
+    print('Building model')
     params = init_params(model_options)
     # reload parameters
     if reload_ and os.path.exists(saveto):
@@ -1101,13 +1101,13 @@ def train(dim_word=100,  # word vector dimensionality
         build_model(tparams, model_options)
     inps = [x, x_mask, y, y_mask, a, a_mask]
 
-    print 'Buliding sampler'
+    print('Buliding sampler')
     f_init, f_next = build_sampler(tparams, model_options, trng)
 
     # before any regularizer
-    print 'Building f_log_probs...',
+    print('Building f_log_probs...')
     f_log_probs = theano.function(inps, cost, profile=profile)
-    print 'Done'
+    print('Done')
 
     cost = cost.mean()
 
@@ -1115,7 +1115,7 @@ def train(dim_word=100,  # word vector dimensionality
     if decay_c > 0.:
         decay_c = theano.shared(numpy.float32(decay_c), name='decay_c')
         weight_decay = 0.
-        for kk, vv in tparams.iteritems():
+        for kk, vv in tparams.items():
             weight_decay += (vv ** 2).sum()
         weight_decay *= decay_c
         cost += weight_decay
@@ -1129,13 +1129,13 @@ def train(dim_word=100,  # word vector dimensionality
         cost += alpha_reg
 
     # after all regularizers - compile the computational graph for cost
-    print 'Building f_cost...',
+    print('Building f_cost...')
     f_cost = theano.function(inps, cost, profile=profile)
-    print 'Done'
+    print('Done')
 
-    print 'Computing gradient...',
+    print('Computing gradient...')
     grads = tensor.grad(cost, wrt=itemlist(tparams))
-    print 'Done'
+    print('Done')
 
     # apply gradient clipping here
     if clip_c > 0.:
@@ -1151,17 +1151,16 @@ def train(dim_word=100,  # word vector dimensionality
 
     # compile the optimizer, the actual computational graph is compiled here
     lr = tensor.scalar(name='lr')
-    print 'Building optimizers...',
+    print('Building optimizers...')
     f_grad_shared, f_update = eval(optimizer)(lr, tparams, grads, inps, cost)
-    print 'Done'
+    print('Done')
 
     
     # print model parameters
-    print "Model params:\n{0}".format(
-            pprint.pformat(sorted([p for p in params])))
+    print("Model params:\n{0}".format(pprint.pformat(sorted([p for p in params]))))
     # end
 
-    print 'Optimization'
+    print('Optimization')
 
     history_errs = []
     # reload history
@@ -1184,7 +1183,7 @@ def train(dim_word=100,  # word vector dimensionality
     ud_s = 0
     ud_epoch = 0
     best_updated = False
-    for eidx in xrange(max_epochs):
+    for eidx in range(max_epochs):
         n_samples = 0
 
         random.shuffle(train) # shuffle data
@@ -1199,7 +1198,7 @@ def train(dim_word=100,  # word vector dimensionality
             x, x_mask, y, y_mask, a, a_mask = prepare_data(model_options, x, y, a, maxlen=maxlen)
 
             if x is None:
-                print 'Minibatch with zero sample under length ', maxlen
+                print('Minibatch with zero sample under length ', maxlen)
                 uidx -= 1
                 continue
 
@@ -1214,13 +1213,13 @@ def train(dim_word=100,  # word vector dimensionality
             # check for bad numbers, usually we remove non-finite elements
             # and continue training - but not done here
             if numpy.isnan(cost) or numpy.isinf(cost):
-                print 'NaN detected'
+                print('NaN detected')
                 return 1., 1., 1.
 
             # verbose
             if numpy.mod(uidx, dispFreq) == 0:
                 ud_s /= 60.
-                print 'Epoch ', eidx, 'Update ', uidx, 'Cost ', cost, 'UD ', ud_s, 'epson ',lrate, 'bad_counter', bad_counter
+                print('Epoch ', eidx, 'Update ', uidx, 'Cost ', cost, 'UD ', ud_s, 'epson ',lrate, 'bad_counter', bad_counter)
                 ud_s = 0
 
             # generate some samples with the model and display them
@@ -1255,9 +1254,9 @@ def train(dim_word=100,  # word vector dimensionality
                             fpp_sample.write(' '+worddicts_r[vv])
                         fpp_sample.write('\n')
                 fpp_sample.close()
-                print 'valid set decode done'
+                print('valid set decode done')
                 ud_epoch = (time.time() - ud_epoch_start) / 60.
-                print 'cost time ... ', ud_epoch
+                print('cost time ... ', ud_epoch)
 
 
             # validate model on validation set and early stop if necessary
@@ -1280,20 +1279,20 @@ def train(dim_word=100,  # word vector dimensionality
                 valid_err=valid_per
                 history_errs.append(valid_err)
 
-                if uidx/validFreq == 0 or valid_err <= numpy.array(history_errs).min(): # the first time valid or worse model
+                if uidx//validFreq == 0 or valid_err <= numpy.array(history_errs).min(): # the first time valid or worse model
                     best_p = unzip(tparams)
                     best_updated = True
                     bad_counter = 0
 
-                if uidx/validFreq != 0 and valid_err > numpy.array(history_errs).min():
+                if uidx//validFreq != 0 and valid_err > numpy.array(history_errs).min():
                     bad_counter += 1
                     if bad_counter > patience:
                         if halfLrFlag==1:
-                            print 'Early Stop!'
+                            print('Early Stop!')
                             estop = True
                             break
                         else:
-                            print 'Lr decay and retrain!'
+                            print('Lr decay and retrain!')
                             bad_counter = 0
                             lrate /= 10
                             params = best_p
@@ -1301,14 +1300,14 @@ def train(dim_word=100,  # word vector dimensionality
 
                 if numpy.isnan(valid_err):
                     #ipdb.set_trace()
-                    print 'valid_err nan'
+                    print('valid_err nan')
 
                 #print 'Valid WER: %.2f%%, SACC: %.2f%%, Cost: %f' % (valid_per,valid_sacc,valid_err_cost)
-                print 'Valid WER: %.2f%%, SACC: %.2f%%' % (valid_per,valid_sacc)
+                print('Valid WER: %.2f%%, SACC: %.2f%%' % (valid_per,valid_sacc))
 
             # save the best model so far
             if numpy.mod(uidx, saveFreq) == 0 and best_updated:
-                print 'Saving...',
+                print('Saving...')
 
                 if best_p is not None:
                     params = best_p
@@ -1316,16 +1315,16 @@ def train(dim_word=100,  # word vector dimensionality
                     params = unzip(tparams)
                 numpy.savez(saveto, history_errs=history_errs, **params)
                 pkl.dump(model_options, open('%s.pkl' % saveto, 'wb'))
-                print 'Done'
+                print('Done')
                 best_updated = False
 
             # finish after this many updates
             if uidx >= finish_after:
-                print 'Finishing after %d iterations!' % uidx
+                print('Finishing after %d iterations!' % uidx)
                 estop = True
                 break
 
-        print 'Seen %d samples' % n_samples
+        print('Seen %d samples' % n_samples)
 
         if estop:
             break

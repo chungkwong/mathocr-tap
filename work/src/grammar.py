@@ -1,4 +1,4 @@
-#!/bin/python
+#!/bin/python3
 
 def load_dict(dictFile):
     fp=open(dictFile)

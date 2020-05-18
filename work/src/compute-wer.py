@@ -55,6 +55,6 @@ def process(recfile, labelfile, resultfile):
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print 'compute-wer.py recfile labelfile resultfile'
+        print('compute-wer.py recfile labelfile resultfile')
         sys.exit(0)
     process(sys.argv[1], sys.argv[2], sys.argv[3])

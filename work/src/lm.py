@@ -71,6 +71,7 @@ def test():
     grammar=compileGrammar(loadGrammar(GRAMMAR_PATH,dictionary))
     testSet=load_data(TEST_PATH,dictionary,grammar)
     model=keras.models.load_model(MODEL_PATH)
+    print(model.summary())
     # feature0 = keras.layers.Input(shape=(None,))
     # feature1 = keras.layers.Embedding(108,EMBEDDING_DIM,mask_zero=True,name='embedding')(feature0)
     # feature2 = keras.layers.LSTM(LSTM_UNITS,return_sequences=True,name='lstm')(feature1)

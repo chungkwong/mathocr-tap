@@ -22,7 +22,7 @@ else
 	done
 	java -jar mathocr-myscript-1.1.jar -o $TMP_DIRECTORY/on-ascii -ascii $@
 	#python gen_ascii_pkl.py $TMP_DIRECTORY
-	python -u ./translate.py -k 10 \
+	python3 -u ./translate.py -k 10 \
 		../data/dictionary.txt \
 		../data/grammar.txt \
 		$TMP_DIRECTORY/ \

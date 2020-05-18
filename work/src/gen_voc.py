@@ -6,7 +6,7 @@ def gen_voc(infile, vocfile):
         for line in f:
             parts = line.strip().split('\t')
             if len(parts) != 2:
-                print 'illegal line: ', line
+                print('illegal line: ', line)
                 continue
             (title,label) = parts
             for w in label.split():
@@ -19,6 +19,6 @@ def gen_voc(infile, vocfile):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print 'gen_voc infile outfile'
+        print('gen_voc infile outfile')
         sys.exit(0)
     gen_voc(sys.argv[1], sys.argv[2])
