@@ -3,7 +3,7 @@
 if ! [ -d ../data/test ] ; then
 	if test `whoami` = 'aistudio' ; then
 		mkdir /home/aistudio/external-libraries
-		conda install theano pygpu python=2.7 pandoc --prefix /home/aistudio/external-libraries
+		conda install theano pygpu python=3.7 pandoc --prefix /home/aistudio/external-libraries
 		ln -s /home/aistudio/external-libraries/bin/x86_64-conda_cos6-linux-gnu-g++ /home/aistudio/external-libraries/bin/g++
 		ln -s /usr/lib/x86_64-linux-gnu/libcudnn.so /home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/lib/libcudnn.so;
 		mkdir ../data ../model ../log ../lm
@@ -23,7 +23,7 @@ if test `whoami` = 'aistudio';then
 	export THEANO_FLAGS=device=cuda,floatX=float32;
 	export CPLUS_INCLUDE_PATH=/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/include/c++/7.3.0:/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/usr/include/:/usr/include:/usr/local/cuda/include;
 	export C_INCLUDE_PATH=/home/aistudio/external-libraries/x86_64-conda_cos6-linux-gnu/sysroot/usr/include/:/usr/include:/usr/local/cuda/include;
-	python3 -m pip install bs4 lxml numpy
+	#python3 -m pip install bs4 lxml numpy
 elif command -v nvcc >/dev/null 2>&1;then
 	echo "Cuda detected";
 	export THEANO_FLAGS=device=cuda,floatX=float32;
@@ -34,5 +34,3 @@ else
 	echo "Using CPU";
 	export THEANO_FLAGS=device=cpu,floatX=float32;
 fi
-
-

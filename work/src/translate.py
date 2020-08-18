@@ -198,12 +198,14 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
     valid,valid_uid_list = dataIterator_valid(data_path,
                          worddicts, batch_size=1, maxlen=250)
 
-    fpp_sample=open(saveto,'w')
+    fpp_sample=[open('%s.%d'%(saveto,beam),'w') for beam in range(k)]
+    
     valid_count_idx=0
 
     print('Decoding...')
     ud_epoch = 0
     ud_epoch_start = time.time()
+    
     for x,y in valid:
         for xx in x:
             print('%d : %s' % (valid_count_idx+1, valid_uid_list[valid_count_idx]))
@@ -218,35 +220,36 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
                                        dictlen=len(worddicts),
                                        stochastic=stochastic,
                                        argmax=False)
-                        
-            if stochastic:
-                ss = sample
-            elif len(sample)>0:
-                score = score / numpy.array([len(s) for s in sample])
-                ss = sample[score.argmin()]
-            else:
-                ss = [0]
+            score = score / numpy.array([len(s) for s in sample])
+            sample_rank=numpy.argsort(score)
+            for beam in range(k):
+                fpp_sample[beam].write(valid_uid_list[valid_count_idx])
+                if len(sample)>beam:
+                    ss=sample[sample_rank[beam]]
+                else:
+                    ss=[0]
 
-            fpp_sample.write(valid_uid_list[valid_count_idx])
+                for vv in ss:
+                    if vv == 0: # <eol>
+                        break
+                    fpp_sample[beam].write(' '+worddicts_r[vv])
+                fpp_sample[beam].write('\n')
             valid_count_idx=valid_count_idx+1
-            for vv in ss:
-                if vv == 0: # <eol>
-                    break
-                fpp_sample.write(' '+worddicts_r[vv])
-            fpp_sample.write('\n')
-    fpp_sample.close()
-    ud_epoch = (time.time() - ud_epoch_start) 
-    print('test set decode done, cost time ...', ud_epoch)
-    os.system('python compute-wer.py ' + saveto + ' ' + os.path.join(data_path,"caption.txt") + ' ' + wer_file)
-    fpp=open(wer_file)
-    stuff=fpp.readlines()
-    fpp.close()
-    m=re.search('WER (.*)\n',stuff[0])
-    valid_per=100. * float(m.group(1))
-    m=re.search('ExpRate (.*)\n',stuff[1])
-    valid_sacc=100. * float(m.group(1))
 
-    print('Valid WER: %.2f%%, ExpRate: %.2f%%' % (valid_per,valid_sacc))
+    ud_epoch = (time.time() - ud_epoch_start) 
+    print 'test set decode done, cost time ...', ud_epoch
+    for beam in range(k):
+        fpp_sample[beam].close();
+        os.system('python compute-wer.py %s.%d %s %s'%(saveto,beam,os.path.join(data_path,"caption.txt"),wer_file))
+        fpp=open(wer_file)
+        stuff=fpp.readlines()
+        fpp.close()
+        m=re.search('WER (.*)\n',stuff[0])
+        valid_per=100. * float(m.group(1))
+        m=re.search('ExpRate (.*)\n',stuff[1])
+        valid_sacc=100. * float(m.group(1))
+
+        print '%d Valid WER: %.2f%%, ExpRate: %.2f%%' % (beam,valid_per,valid_sacc)
 
 
 if __name__ == "__main__":
