@@ -239,6 +239,7 @@ def main(model_files, dictionary_target, grammar_target, data_path, saveto, wer_
     ud_epoch = (time.time() - ud_epoch_start) 
     print 'test set decode done, cost time ...', ud_epoch
     for beam in range(k):
+        fpp_sample[beam].flush();
         fpp_sample[beam].close();
         os.system('python compute-wer.py %s.%d %s %s'%(saveto,beam,os.path.join(data_path,"caption.txt"),wer_file))
         fpp=open(wer_file)

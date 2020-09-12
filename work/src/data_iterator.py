@@ -1,14 +1,47 @@
 import numpy
-
-import gzip
-import numpy as np
 import os
 import sys
+import math
 
 def fopen(filename, mode='r'):
-    if filename.endswith('.gz'):
-        return gzip.open(filename, mode)
     return open(filename, mode)
+
+def normalize(mat):
+    xSum=0
+    ySum=0
+    xxSum=0
+    xxCSum=0
+    length=0
+    last=None
+    for curr in mat:
+        if not(last is None):
+            len=math.hypot(curr[0]-last[0],curr[1]-last[1])
+            xSum+=(last[0]+curr[0])*len
+            ySum+=(last[1]+curr[1])*len
+            xxSum+=(last[0]*last[0]+curr[0]*curr[0])*len
+            xxCSum+=(last[0]*curr[0])*len
+            length+=len
+        if curr[2]==1:
+            last=None
+        else:
+            last=curr
+    if not(length>0):
+        length=numpy.max(mat[:,1])-numpy.min(mat[:,1])+1e-7
+    centerX=xSum*0.5/length
+    centerY=ySum*0.5/length
+    variance=math.sqrt(((xxSum+xxCSum)/3+centerX*centerX*length-centerX*xSum)/length)
+    if not(variance>0):
+        variance=length
+    matX=mat[:,0:1]
+    matY=mat[:,1:2]
+    matX=(matX-centerX)/variance
+    matY=(matY-centerY)/variance
+    matXY=numpy.hstack([matX,matY])
+    matXY1=numpy.vstack([matXY[1:],matXY[-1:]])-matXY
+    matXY2=numpy.vstack([matXY[2:],matXY[-2:]])-matXY
+    matUp=mat[:,-1:]
+    matDown=1-matUp
+    return numpy.hstack([matXY,matXY1,matXY2,matDown,matUp])
 
 def loadFeature(feature_path,scp_path):
     features={}
@@ -21,7 +54,7 @@ def loadFeature(feature_path,scp_path):
         else:
             key = line.split('\t')[0]
             feature_file = os.path.join(feature_path, key + '.ascii')
-            mat = np.loadtxt(feature_file)
+            mat = normalize(numpy.loadtxt(feature_file))
             sentNum = sentNum + 1
             features[key] = mat
             if sentNum // 500 == sentNum * 1.0 / 500:

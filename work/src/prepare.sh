@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ! [ -d ../data/test ] ; then
+if ! [ -d ../data/valid ] ; then
 	if test `whoami` = 'aistudio' ; then
 		mkdir /home/aistudio/external-libraries
 		conda install theano pygpu python=3.7 pandoc --prefix /home/aistudio/external-libraries
